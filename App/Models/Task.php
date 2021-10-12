@@ -8,11 +8,14 @@ class Task extends BaseModel
         $query = $this->start()->insertInto('tasks')->values($values)->execute();
         return $query;
     }
-    public function getTasks($page = 1)
+    public function getTasks($page = 1,$orderBy)
     {
         $pageSize = 3;
         $count = $this->start()->from('tasks')->count();
-        $tasks = $this->start()->from('tasks')->offset(($page - 1) * $pageSize)->limit($pageSize)->fetchAll();
+        if($orderBy!=" ")
+            $tasks = $this->start()->from('tasks')->orderBy($orderBy)->offset(($page - 1) * $pageSize)->limit($pageSize)->fetchAll();
+        else
+            $tasks = $this->start()->from('tasks')->offset(($page - 1) * $pageSize)->limit($pageSize)->fetchAll();
         $result = [
             'count' => $count,
             'tasks' => $tasks

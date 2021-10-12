@@ -2,14 +2,14 @@
     <thead>
         <tr>
             <th scope="col">#</th>
-            <th scope="col">login</th>
-            <th scope="col">email</th>
+            <th scope="col"><a href="<?= $sort['login'] ?>" class="text-dark">login <i class="fa fa-fw fa-sort"></i></a></th>
+            <th scope="col"> <a href="<?= $sort['email'] ?>" class="text-dark">email <i class="fa fa-fw fa-sort"></i></a></th>
             <th scope="col">description</th>
-            <th scope="col">status</th>
+            <th scope="col"><a href="<?= $sort['status'] ?>" class="text-dark">status <i class="fa fa-fw fa-sort"></i></a></th>
             <th scope="col">changed</th>
             <?php
             if ($isLogin) {
-            ?> <th scope="col">options</th> <?
+            ?><th scope="col">options</th> <?
                                         }
                                             ?>
         </tr>

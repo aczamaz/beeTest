@@ -35,33 +35,71 @@ class TableController extends BaseController
         $pageCount = ceil($count / 3);
         for($i = 1; $i < $pageCount+1; $i++)
         {
-            $pageItem = [ 'label'=> $i,'url'=>"/?page=$i" ]; 
+            $url = $this->getUrlForLinks($i, $_GET['sort']);
+            $pageItem = [ 'label'=> $i,'url'=>"/". $url ]; 
             if($page == $i)
                 $pageItem['active'] = true;
             $result[] = $pageItem;
         }
-        array_unshift($result, ['label' => 'Previous', 'url' => ($page == 1) ? '#' : ('/?page=' . ($page - 1))]);
-        array_push($result,['label' => 'Next','url'=> ($page == $pageCount)?'#':('/?page='. ($page + 1))]);
+        array_unshift($result, ['label' => 'Previous', 'url' => ($page == 1) ? '#' : ('/' . $this->getUrlForLinks($page - 1, $_GET['sort']))]);
+        array_push($result,['label' => 'Next','url'=> ($page == $pageCount)?'#': ('/' . $this->getUrlForLinks($page + 1, $_GET['sort']))]);
         return $result;
     }
+    private function generateUrl()
+    {
+        $pageUrl = "";
+        $sortParams = explode("_", $_GET['sort']);
+        if ($_GET['page'] || $_GET['sort']) {
+            $data = [
+                'page' => $_GET['page'] ?? null,
+                'sort' => $_GET['sort'] ? $sortParams[0] . "_" . $sortParams[1] : null
+            ];
+            $pageUrl = "?" . http_build_query($data);
+        }
+        return $pageUrl;
+    }
+
     public function index()
     {
         $page = $_GET['page'] ?? 1;
         $task = new Task();
-        $result = $task->getTasks($page);
-        $pageUrl = "";
-        if($_GET['page'])
-            $pageUrl = "?page=" . $_GET['page'];
+        $sortParams = explode("_", $_GET['sort']);
+        $orderBy = "$sortParams[0] $sortParams[1]";
+        $result = $task->getTasks($page, strtoupper($orderBy));
+        $pageUrl = $this->generateUrl();
         foreach ($result['tasks'] as &$task)
         {
             $task['editUrl'] = "/edit-task/" . $task['id'] ."/". $pageUrl;
             $task['doneUrl'] = "/done-task/". $task['id'] ."/". $pageUrl;
         }
-
+        $sort = [
+            'login'=>'login_asc',
+            'email' => 'email_asc',
+            'status'=> 'status_asc'
+        ];
+        if($_GET['sort'])
+        {
+            if($sortParams[1] == 'asc')
+                $sortParams[1] = 'desc';
+            else
+                $sortParams[1] = 'asc';
+        }
+        $sort[$sortParams[0]] = $sortParams[0]."_".$sortParams[1];  
+        foreach ($sort as $key => &$value)
+        {
+            $paramSort = explode("_", $value);
+                $data = [
+                    'page' => $_GET['page'] ?? null,
+                    'sort' => $paramSort[0] . "_" . $paramSort[1]
+                ];
+                $pageUrl = "?" . http_build_query($data);
+                $sort[$key] = $pageUrl;
+        }
         $this->render('index', [
                 'table' => $result['tasks'],
                 'pagination' => $this->generatePagination($page, $result['count']),
-                'isLogin' => $this->fields['isLogin']
+                'isLogin' => $this->fields['isLogin'],
+                'sort' => $sort
             ]
         );
     }
@@ -98,12 +136,19 @@ class TableController extends BaseController
             );
         }
     }
+    public function getUrlForLinks($page = null,$sort=null)
+    {
+        $data = [
+            'page' => $page??$_GET['page'],
+            'sort' => $sort??$_GET['sort']
+        ];
+        return "?" . http_build_query($data);
+    }
     public function done($taskId)
     {
         $task = new Task();
         $task->done($taskId);
-        $url = ($_GET['page'])?('/?page='. $_GET['page']):'/';
-        Header("Location:". $url);
+        Header("Location:/". $this->getUrlForLinks($_GET['page'], $_GET['sort']));
     }
     public function editTaskForm($taskId)
     {
@@ -129,8 +174,8 @@ class TableController extends BaseController
         $task = new Task();
         $result = $task->updateTask($taskId, $values);
         if ($result) {
-            $url = ($_GET['page']) ? ('/?page=' . $_GET['page']) : '/';
-            Header("Location:$url");
+            Header("Location:/" . $this->getUrlForLinks($_GET['page'], $_GET['sort']));
+            exit();
         } else {
             $form = $this->getEditDate($taskId);
             $this->fields = array_merge($this->fields, $form);
