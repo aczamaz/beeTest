@@ -9,10 +9,10 @@
                 <input type="email" name="email" required class="form-control" placeholder="Your Email *" value="<?= $email ?>" />
             </div>
             <div class="form-group">
-                <textarea class="form-control" name="description" id="exampleFormControlTextarea1" rows="3"><?= $description ?></textarea>
+                <textarea class="form-control" name="description" required id="exampleFormControlTextarea1" rows="3"><?= $description ?></textarea>
             </div>
             <div class="form-group">
-                <input type="submit" class="btnSubmit" value="<?= $button ?>" />
+                <input type="submit" class="btnSubmit btn btn-primary" value="<?= $button ?>" />
             </div>
         </form>
     </div>

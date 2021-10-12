@@ -6,7 +6,7 @@ class BaseModel
     public $query;
     public function start()
     {
-        $pdo = new \PDO('mysql:host=localhost;dbname=bee', 'root', 'root', array(
+        $pdo = new \PDO("mysql:host=".$_ENV['DB_HOST'].";dbname=".$_ENV['DB_NAME']."", $_ENV['DB_LOGIN'], $_ENV['DB_PASSOWRD'], array(
             \PDO::ATTR_EMULATE_PREPARES => false,
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
         ));

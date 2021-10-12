@@ -123,6 +123,8 @@ class TableController extends BaseController
         $result = $task->addTask($values);
         if($result)
         {
+            session_start();
+            setcookie('addedTask', true, time() + 60 * 60 * 24 * 30, '/');
             Header("Location:/");
         }
         else
@@ -165,6 +167,11 @@ class TableController extends BaseController
     }
     public function editTask($taskId)
     {
+        if(empty($this->fields['isLogin']))
+        {
+            Header("Location:/login/");
+            exit();
+        }
         $values = [
             'login' => $_POST['login'],
             'email' => $_POST['email'],
