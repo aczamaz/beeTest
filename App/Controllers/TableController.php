@@ -28,6 +28,10 @@ class TableController extends BaseController
     {
         session_start();
         $this->fields['isLogin'] = $_SESSION['isLogin'] ?? null;
+        foreach ($_POST as $key => $value)
+            $_POST[$key] = htmlspecialchars($value);
+        foreach ($_GET as $key => $value)
+            $_GET[$key] = htmlspecialchars($value);
     }
     private function generatePagination($page,$count)
     {
